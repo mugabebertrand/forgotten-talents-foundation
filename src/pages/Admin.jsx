@@ -12,8 +12,11 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../Firebase";
-
-import { getStorage, ref as storageRef, deleteObject } from "firebase/storage";
+import {
+  getStorage,
+  ref as storageRef,
+  deleteObject,
+} from "firebase/storage";
 
 export default function Admin() {
   const [subs, setSubs] = useState([]);
@@ -23,14 +26,24 @@ export default function Admin() {
 
   const loadSubmissions = async () => {
     setLoading(true);
+
     try {
-      const q = query(collection(db, "submissions"), orderBy("createdAt", "desc"));
-      const snap = await getDocs(q);
-      const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setSubs(rows);
-    } catch (e) {
-      console.error("Load submissions error:", e);
-      alert("Failed to load submissions. Check console.");
+      const submissionsQuery = query(
+        collection(db, "submissions"),
+        orderBy("createdAt", "desc")
+      );
+
+      const snapshot = await getDocs(submissionsQuery);
+
+      const submissions = snapshot.docs.map((submissionDocument) => ({
+        id: submissionDocument.id,
+        ...submissionDocument.data(),
+      }));
+
+      setSubs(submissions);
+    } catch (error) {
+      console.error("Load submissions error:", error);
+      alert("Failed to load submissions. Check the console.");
     } finally {
       setLoading(false);
     }
@@ -40,191 +53,314 @@ export default function Admin() {
     loadSubmissions();
   }, []);
 
-  // Helper: find & delete published talent(s) made from a submission
   const deleteTalentBySubmissionId = async (submissionId) => {
-    const q = query(
+    const talentsQuery = query(
       collection(db, "talents"),
       where("sourceSubmissionId", "==", submissionId)
     );
-    const snap = await getDocs(q);
 
-    // could be 0 or more docs (usually 1)
-    for (const d of snap.docs) {
-      await deleteDoc(doc(db, "talents", d.id));
+    const snapshot = await getDocs(talentsQuery);
+
+    for (const talentDocument of snapshot.docs) {
+      await deleteDoc(doc(db, "talents", talentDocument.id));
     }
-    return snap.size; // how many were deleted
+
+    return snapshot.size;
   };
 
-  const approveSubmission = async (sub) => {
+  const approveSubmission = async (submission) => {
     try {
-      // 1) Create a published talent doc (this is what /talents reads)
+      await deleteTalentBySubmissionId(submission.id);
+
       await addDoc(collection(db, "talents"), {
-        name: sub.childName || "Anonymous Child",
-        age: sub.childAge ?? null,
-        title: sub.title || "Untitled Talent",
-        description: sub.description || "Shared with permission. Personal details are protected.",
-        mediaUrl: sub.fileURL,
-        mediaType: sub.fileType?.startsWith("audio/")
+        name: submission.childName || "Anonymous Child",
+        age: submission.childAge ?? null,
+        title: submission.title || "Untitled Talent",
+        description:
+          submission.description ||
+          "Shared with permission. Personal details are protected.",
+        mediaUrl: submission.fileURL || "",
+        mediaType: submission.fileType?.startsWith("audio/")
           ? "audio"
-          : sub.fileType?.startsWith("video/")
+          : submission.fileType?.startsWith("video/")
           ? "video"
-          : sub.fileType?.startsWith("image/")
+          : submission.fileType?.startsWith("image/")
           ? "image"
           : "unknown",
         approved: true,
         createdAt: serverTimestamp(),
-        sourceSubmissionId: sub.id,
-        sponsorCode: sub.sponsorCode || null,
-
-        // ✅ keep storage path so we can delete later if needed
-        storagePath: sub.storagePath || null,
+        sourceSubmissionId: submission.id,
+        sponsorCode: submission.sponsorCode || null,
+        storagePath: submission.storagePath || null,
       });
 
-      // 2) Mark submission approved
-      await updateDoc(doc(db, "submissions", sub.id), {
+      await updateDoc(doc(db, "submissions", submission.id), {
         approved: true,
         status: "approved",
         reviewedAt: serverTimestamp(),
       });
 
       alert("✅ Approved and published to Talents!");
-      loadSubmissions();
-    } catch (e) {
-      console.error("Approve error:", e);
-      alert("❌ Approve failed. Check console.");
+      await loadSubmissions();
+    } catch (error) {
+      console.error("Approve error:", error);
+      alert("❌ Approval failed. Check the console.");
     }
   };
 
-  const rejectSubmission = async (sub) => {
+  const rejectSubmission = async (submission) => {
     try {
-      await updateDoc(doc(db, "submissions", sub.id), {
+      await deleteTalentBySubmissionId(submission.id);
+
+      await updateDoc(doc(db, "submissions", submission.id), {
         approved: false,
         status: "rejected",
         reviewedAt: serverTimestamp(),
       });
 
-      alert("✅ Rejected (submission only).");
-      loadSubmissions();
-    } catch (e) {
-      console.error("Reject error:", e);
-      alert("❌ Reject failed. Check console.");
+      alert("✅ Submission rejected.");
+      await loadSubmissions();
+    } catch (error) {
+      console.error("Reject error:", error);
+      alert("❌ Rejection failed. Check the console.");
     }
   };
 
-  // ✅ Unpublish from talents (does NOT delete the submission)
-  const unpublish = async (sub) => {
+  const unpublishSubmission = async (submission) => {
     try {
-      const deletedCount = await deleteTalentBySubmissionId(sub.id);
+      const deletedCount = await deleteTalentBySubmissionId(submission.id);
 
-      await updateDoc(doc(db, "submissions", sub.id), {
-        status: "unpublished",
+      await updateDoc(doc(db, "submissions", submission.id), {
         approved: false,
+        status: "unpublished",
         reviewedAt: serverTimestamp(),
       });
 
-      alert(`✅ Unpublished. Removed ${deletedCount} item(s) from Talents.`);
-      loadSubmissions();
-    } catch (e) {
-      console.error("Unpublish error:", e);
-      alert("❌ Unpublish failed. Check console.");
+      alert(
+        `✅ Unpublished. Removed ${deletedCount} item(s) from the Talents page.`
+      );
+
+      await loadSubmissions();
+    } catch (error) {
+      console.error("Unpublish error:", error);
+      alert("❌ Unpublish failed. Check the console.");
     }
   };
 
-  // ✅ Delete EVERYTHING: submission + published talent + storage file
-  const deleteForever = async (sub) => {
-    const ok = confirm(
-      "Delete forever?\nThis will remove:\n- the submission\n- the published talent (if any)\n- the uploaded file in Storage (if available)\n\nThis cannot be undone."
+  const deleteForever = async (submission) => {
+    const confirmed = window.confirm(
+      "Delete forever?\n\n" +
+        "This will remove:\n" +
+        "- the submission\n" +
+        "- the published talent\n" +
+        "- the uploaded file\n\n" +
+        "This action cannot be undone."
     );
-    if (!ok) return;
+
+    if (!confirmed) {
+      return;
+    }
 
     try {
-      // 1) delete published talents made from this submission
-      await deleteTalentBySubmissionId(sub.id);
+      await deleteTalentBySubmissionId(submission.id);
 
-      // 2) delete storage file if we know the path
-      if (sub.storagePath) {
+      if (submission.storagePath) {
         try {
-          await deleteObject(storageRef(storage, sub.storagePath));
-        } catch (err) {
-          console.warn("Storage delete failed (maybe already deleted):", err);
+          const uploadedFileReference = storageRef(
+            storage,
+            submission.storagePath
+          );
+
+          await deleteObject(uploadedFileReference);
+        } catch (storageError) {
+          console.warn(
+            "Storage deletion failed, or the file was already deleted:",
+            storageError
+          );
         }
       }
 
-      // 3) delete the submission document
-      await deleteDoc(doc(db, "submissions", sub.id));
+      await deleteDoc(doc(db, "submissions", submission.id));
 
       alert("✅ Deleted forever.");
-      loadSubmissions();
-    } catch (e) {
-      console.error("Delete forever error:", e);
-      alert("❌ Delete forever failed. Check console.");
+      await loadSubmissions();
+    } catch (error) {
+      console.error("Delete forever error:", error);
+      alert("❌ Delete forever failed. Check the console.");
     }
   };
 
+  const buttonBaseStyle = {
+    border: "none",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontSize: "0.95rem",
+    minWidth: 170,
+  };
+
   return (
-    <div style={{ padding: "2rem" }}>
+    <div
+      style={{
+        padding: "clamp(1rem, 4vw, 2rem)",
+        maxWidth: 1200,
+        margin: "0 auto",
+      }}
+    >
       <h1>Admin Review</h1>
+
       <p style={{ color: "#666" }}>
-        Review uploads in <b>submissions</b>. Approving publishes to <b>talents</b>.
+        Review uploads in <strong>submissions</strong>. Approving publishes to{" "}
+        <strong>talents</strong>.
       </p>
 
       {loading && <p>Loading submissions...</p>}
+
       {!loading && subs.length === 0 && <p>No submissions yet.</p>}
 
-      <div style={{ display: "grid", gap: "1rem", marginTop: "1rem" }}>
-        {subs.map((s) => (
+      <div
+        style={{
+          display: "grid",
+          gap: "1rem",
+          marginTop: "1rem",
+        }}
+      >
+        {subs.map((submission) => (
           <div
-            key={s.id}
+            key={submission.id}
             style={{
               border: "1px solid #e5e7eb",
               borderRadius: 12,
               padding: 16,
-              background: "#fff",
+              background: "#ffffff",
+              width: "100%",
+              boxSizing: "border-box",
+              overflow: "hidden",
             }}
           >
-            <h3 style={{ margin: 0 }}>{s.title || "Untitled"}</h3>
+            <h3 style={{ margin: 0 }}>
+              {submission.title || "Untitled"}
+            </h3>
 
-            <p style={{ margin: "6px 0", color: "#555" }}>
-              Child: <b>{s.childName || "Anonymous"}</b>{" "}
-              {s.childAge ? `(Age ${s.childAge})` : ""}
+            <p
+              style={{
+                margin: "6px 0",
+                color: "#555",
+              }}
+            >
+              Child:{" "}
+              <strong>{submission.childName || "Anonymous"}</strong>{" "}
+              {submission.childAge
+                ? `(Age ${submission.childAge})`
+                : ""}
             </p>
 
-            <p style={{ margin: "6px 0", color: "#777" }}>
-              Status: <b>{s.status || "submitted"}</b> | Approved:{" "}
-              <b>{String(!!s.approved)}</b>
+            <p
+              style={{
+                margin: "6px 0",
+                color: "#777",
+              }}
+            >
+              Status:{" "}
+              <strong>{submission.status || "submitted"}</strong> | Approved:{" "}
+              <strong>{String(Boolean(submission.approved))}</strong>
             </p>
 
-            {s.fileType?.startsWith("video/") && (
+            {submission.fileType?.startsWith("image/") && (
+              <img
+                src={submission.fileURL}
+                alt={submission.title || "Uploaded talent"}
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  maxWidth: "100%",
+                  maxHeight: 420,
+                  objectFit: "contain",
+                  borderRadius: 8,
+                  margin: "10px 0 0",
+                  display: "block",
+                }}
+              />
+            )}
+
+            {submission.fileType?.startsWith("video/") && (
               <video
                 controls
-                src={s.fileURL}
-                style={{ width: "100%", borderRadius: 8, marginTop: 10 }}
+                src={submission.fileURL}
+                style={{
+                  width: "100%",
+                  maxHeight: 400,
+                  objectFit: "contain",
+                  borderRadius: 8,
+                  marginTop: 10,
+                  display: "block",
+                  background: "#111",
+                }}
               />
             )}
 
-            {s.fileType?.startsWith("audio/") && (
-              <audio controls src={s.fileURL} style={{ width: "100%", marginTop: 10 }} />
-            )}
-
-            {s.fileType?.startsWith("image/") && (
-              <img
-                src={s.fileURL}
-                alt={s.title || "uploaded"}
-                style={{ width: "100%", borderRadius: 8, marginTop: 10 }}
+            {submission.fileType?.startsWith("audio/") && (
+              <audio
+                controls
+                src={submission.fileURL}
+                style={{
+                  width: "100%",
+                  marginTop: 10,
+                }}
               />
             )}
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
-              <button onClick={() => approveSubmission(s)}>✅ Approve & Publish</button>
-              <button onClick={() => rejectSubmission(s)}>❌ Reject (submission)</button>
-
-              <button onClick={() => unpublish(s)}>🗑️ Unpublish (remove from gallery)</button>
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                flexWrap: "wrap",
+                marginTop: 16,
+              }}
+            >
+              <button
+                onClick={() => approveSubmission(submission)}
+                style={{
+                  ...buttonBaseStyle,
+                  background: "#16a34a",
+                  color: "#ffffff",
+                }}
+              >
+                ✅ Approve & Publish
+              </button>
 
               <button
-                onClick={() => deleteForever(s)}
-                style={{ background: "#fee2e2", border: "1px solid #ef4444" }}
+                onClick={() => rejectSubmission(submission)}
+                style={{
+                  ...buttonBaseStyle,
+                  background: "#6b7280",
+                  color: "#ffffff",
+                }}
               >
-                ⚠️ Delete Forever (incl. file)
+                ❌ Reject
+              </button>
+
+              <button
+                onClick={() => unpublishSubmission(submission)}
+                style={{
+                  ...buttonBaseStyle,
+                  background: "#f59e0b",
+                  color: "#111827",
+                }}
+              >
+                🗑️ Unpublish
+              </button>
+
+              <button
+                onClick={() => deleteForever(submission)}
+                style={{
+                  ...buttonBaseStyle,
+                  background: "#dc2626",
+                  color: "#ffffff",
+                }}
+              >
+                ⚠️ Delete Forever
               </button>
             </div>
           </div>

@@ -26,7 +26,7 @@ export default function Home() {
         >
           <div>
             <div style={{ fontSize: 14, opacity: 0.85, marginBottom: 10 }}>
-              Forgotten Talented Ones Foundation
+              Forgotten Talented Foundation
             </div>
 
             <h1 style={{ fontSize: 48, lineHeight: 1.05, margin: "0 0 14px" }}>

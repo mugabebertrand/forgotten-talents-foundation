@@ -29,39 +29,63 @@ export default function Upload() {
   const [msg, setMsg] = useState("");
 
   const onChange = (e) => {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+    setForm((previousForm) => ({
+      ...previousForm,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   async function validateSponsorCode(code) {
-    const q = query(
+    const sponsorCodeQuery = query(
       collection(db, "sponsorCodes"),
       where("code", "==", code.trim()),
       where("isActive", "==", true)
     );
-    const snap = await getDocs(q);
-    return !snap.empty;
+
+    const snapshot = await getDocs(sponsorCodeQuery);
+
+    return !snapshot.empty;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
 
-    if (!agree) return setMsg("Please confirm permission to upload.");
-    if (!file) return setMsg("Please choose an audio/video/image file.");
+    if (!agree) {
+      setMsg("Please confirm permission to upload.");
+      return;
+    }
 
-    // Required fields (kept minimal)
-    if (!form.sponsorCode || !form.childName || !form.sponsorName || !form.title) {
-      return setMsg("Please fill all required fields.");
+    if (!file) {
+      setMsg("Please choose an audio, video, or image file.");
+      return;
+    }
+
+    if (
+      !form.sponsorCode ||
+      !form.childName ||
+      !form.sponsorName ||
+      !form.title
+    ) {
+      setMsg("Please fill in all required fields.");
+      return;
     }
 
     setLoading(true);
 
+    let currentStep = "starting the submission";
+
     try {
-      // Validate invitation code in Firestore
-      const ok = await validateSponsorCode(form.sponsorCode);
-      if (!ok) {
-        setLoading(false);
-        return setMsg("Invalid invitation code or inactive code.");
+      currentStep = "validating the invitation code";
+      console.log("Step 1: Validating invitation code");
+
+      const validCode = await validateSponsorCode(form.sponsorCode);
+
+      console.log("Invitation code is valid:", validCode);
+
+      if (!validCode) {
+        setMsg("Invalid invitation code or inactive code.");
+        return;
       }
 
       const isVideo = file.type.startsWith("video/");
@@ -69,23 +93,33 @@ export default function Upload() {
       const isImage = file.type.startsWith("image/");
 
       if (!isVideo && !isAudio && !isImage) {
-        setLoading(false);
-        return setMsg("Only audio, video, or image files are allowed.");
+        setMsg("Only audio, video, or image files are allowed.");
+        return;
       }
 
-      // Upload file to Storage
-      const safeName = file.name.replace(/\s+/g, "_");
-      const storagePath = `submissions/${form.sponsorCode.trim()}/${Date.now()}_${safeName}`;
+      currentStep = "uploading the file to Firebase Storage";
+      console.log("Step 2: Uploading file to Firebase Storage");
+
+      const safeFileName = file.name.replace(/\s+/g, "_");
+
+      const storagePath = `submissions/${form.sponsorCode.trim()}/${Date.now()}_${safeFileName}`;
+
       const storageRef = ref(storage, storagePath);
 
       await uploadBytes(storageRef, file);
+
+      currentStep = "getting the file download URL";
+      console.log("Step 3: Getting file download URL");
+
       const downloadURL = await getDownloadURL(storageRef);
 
-      // Save submission in Firestore
+      currentStep = "saving the submission to Firestore";
+      console.log("Step 4: Saving submission to Firestore");
+
       await addDoc(collection(db, "submissions"), {
         sponsorCode: form.sponsorCode.trim(),
 
-        childName: form.childName.trim(), // nickname/initials
+        childName: form.childName.trim(),
         childAge: form.childAge ? Number(form.childAge) : null,
 
         sponsorName: form.sponsorName.trim(),
@@ -105,9 +139,10 @@ export default function Upload() {
         createdAt: serverTimestamp(),
       });
 
+      console.log("Submission saved successfully");
+
       setMsg("✅ Submitted! This entry is pending admin review.");
 
-      // Reset
       setForm({
         sponsorCode: "",
         childName: "",
@@ -118,93 +153,193 @@ export default function Upload() {
         title: "",
         description: "",
       });
+
       setFile(null);
       setAgree(false);
-    } catch (err) {
-      console.error("Upload error:", err);
-      setMsg("❌ Upload failed. Check the console.");
+
+      const fileInput = document.querySelector('input[type="file"]');
+
+      if (fileInput) {
+        fileInput.value = "";
+      }
+    } catch (error) {
+      console.error("Upload failed during:", currentStep);
+      console.error("Firebase error code:", error.code);
+      console.error("Full error:", error);
+
+      setMsg(
+        `❌ Failed while ${currentStep}. Error: ${
+          error.code || error.message || "Unknown error"
+        }`
+      );
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div style={{ padding: "2rem", maxWidth: 820, margin: "0 auto" }}>
+    <div
+      style={{
+        padding: "2rem",
+        maxWidth: 820,
+        margin: "0 auto",
+      }}
+    >
       <h1>Submit Talent</h1>
 
-      <p style={{ color: "#4b5563", lineHeight: 1.6 }}>
-        Sponsors/parents can submit an <b>audio/video/image</b>.
-        Please do <b>NOT</b> share school name, home address, schedules, or other sensitive personal details.
+      <p
+        style={{
+          color: "#4b5563",
+          lineHeight: 1.6,
+        }}
+      >
+        Sponsors/parents can submit an <b>audio, video, or image</b>. Please do{" "}
+        <b>NOT</b> share a school name, home address, schedules, or other
+        sensitive personal details.
       </p>
 
-      <div style={{ marginTop: 10, padding: 12, border: "1px solid #e5e7eb", borderRadius: 12 }}>
-        <b>Privacy note:</b> Use a child nickname/initials (example: “A.B.”) instead of a full name.
+      <div
+        style={{
+          marginTop: 10,
+          padding: 12,
+          border: "1px solid #e5e7eb",
+          borderRadius: 12,
+        }}
+      >
+        <b>Privacy note:</b> Use a child nickname or initials, such as “A.B.”,
+        instead of a full name.
       </div>
 
-      <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          marginTop: "1rem",
+        }}
+      >
         <h3>Invitation Code *</h3>
-        <p style={{ marginTop: -6, color: "#6b7280", fontSize: 13 }}>
-          This helps prevent spam and keeps submissions review-only during the MVP stage.
+
+        <p
+          style={{
+            marginTop: -6,
+            color: "#6b7280",
+            fontSize: 13,
+          }}
+        >
+          This helps prevent spam and keeps submissions review-only during the
+          MVP stage.
         </p>
+
         <input
           name="sponsorCode"
           value={form.sponsorCode}
           onChange={onChange}
           placeholder="Example: FTF-0001"
-          style={{ width: "100%", padding: 10, marginBottom: 12 }}
+          style={{
+            width: "100%",
+            padding: 10,
+            marginBottom: 12,
+          }}
         />
 
         <h3>Child Information *</h3>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
           <input
             name="childName"
             value={form.childName}
             onChange={onChange}
             placeholder="Child nickname / initials (e.g., A.B.)"
-            style={{ flex: 1, padding: 10, marginBottom: 12, minWidth: 260 }}
+            style={{
+              flex: 1,
+              padding: 10,
+              marginBottom: 12,
+              minWidth: 260,
+            }}
           />
+
           <input
             name="childAge"
             value={form.childAge}
             onChange={onChange}
             placeholder="Age (optional)"
-            style={{ width: 160, padding: 10, marginBottom: 12 }}
+            type="number"
+            min="0"
+            max="18"
+            style={{
+              width: 160,
+              padding: 10,
+              marginBottom: 12,
+            }}
           />
         </div>
 
         <h3>Sponsor / Parent Information *</h3>
+
         <input
           name="sponsorName"
           value={form.sponsorName}
           onChange={onChange}
           placeholder="Sponsor/Parent name"
-          style={{ width: "100%", padding: 10, marginBottom: 12 }}
+          style={{
+            width: "100%",
+            padding: 10,
+            marginBottom: 12,
+          }}
         />
 
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            flexWrap: "wrap",
+          }}
+        >
           <input
             name="phone"
             value={form.phone}
             onChange={onChange}
             placeholder="Phone (optional — for follow-up)"
-            style={{ flex: 1, padding: 10, marginBottom: 12, minWidth: 260 }}
+            style={{
+              flex: 1,
+              padding: 10,
+              marginBottom: 12,
+              minWidth: 260,
+            }}
           />
+
           <input
             name="email"
             value={form.email}
             onChange={onChange}
             placeholder="Email (optional — for follow-up)"
-            style={{ flex: 1, padding: 10, marginBottom: 12, minWidth: 260 }}
+            type="email"
+            style={{
+              flex: 1,
+              padding: 10,
+              marginBottom: 12,
+              minWidth: 260,
+            }}
           />
         </div>
 
         <h3>Talent Details *</h3>
+
         <input
           name="title"
           value={form.title}
           onChange={onChange}
           placeholder="Talent title (e.g., Piano performance)"
-          style={{ width: "100%", padding: 10, marginBottom: 12 }}
+          style={{
+            width: "100%",
+            padding: 10,
+            marginBottom: 12,
+          }}
         />
 
         <textarea
@@ -212,30 +347,59 @@ export default function Upload() {
           value={form.description}
           onChange={onChange}
           placeholder="Short description (optional)"
-          style={{ width: "100%", padding: 10, marginBottom: 12, minHeight: 90 }}
+          style={{
+            width: "100%",
+            padding: 10,
+            marginBottom: 12,
+            minHeight: 90,
+          }}
         />
 
         <input
           type="file"
           accept="audio/*,video/*,image/*"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
-          style={{ marginBottom: 12 }}
+          style={{
+            marginBottom: 12,
+          }}
         />
 
-        <label style={{ display: "block", marginBottom: 12 }}>
+        <label
+          style={{
+            display: "block",
+            marginBottom: 12,
+          }}
+        >
           <input
             type="checkbox"
             checked={agree}
             onChange={(e) => setAgree(e.target.checked)}
           />{" "}
-          I confirm I am the sponsor/parent/guardian and I have permission to submit this media.
+          I confirm that I am the sponsor, parent, or guardian and that I have
+          permission to submit this media.
         </label>
 
-        <button disabled={loading} style={{ padding: "10px 16px" }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: "10px 16px",
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
           {loading ? "Submitting..." : "Submit"}
         </button>
 
-        {msg && <p style={{ marginTop: 12 }}>{msg}</p>}
+        {msg && (
+          <p
+            style={{
+              marginTop: 12,
+              lineHeight: 1.5,
+            }}
+          >
+            {msg}
+          </p>
+        )}
       </form>
     </div>
   );

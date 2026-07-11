@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../Firebase";
 
 export default function Talents() {
@@ -9,21 +14,25 @@ export default function Talents() {
   useEffect(() => {
     const fetchTalents = async () => {
       try {
-        // ✅ allow boolean true OR string "true" (common mistake)
-        const q = query(
+        const talentsQuery = query(
           collection(db, "talents"),
           where("approved", "in", [true, "true"])
         );
 
-        const snapshot = await getDocs(q);
+        const snapshot = await getDocs(talentsQuery);
 
-        const data = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const publishedTalents = snapshot.docs
+          .map((talentDocument) => ({
+            id: talentDocument.id,
+            ...talentDocument.data(),
+          }))
+          .filter(
+            (talent) =>
+              talent.name?.toLowerCase() !== "test child" &&
+              talent.title?.toLowerCase() !== "singing talent"
+          );
 
-        console.log("Talents fetched:", data);
-        setTalents(data);
+        setTalents(publishedTalents);
       } catch (error) {
         console.error("Error fetching talents:", error);
       } finally {
@@ -34,11 +43,28 @@ export default function Talents() {
     fetchTalents();
   }, []);
 
-  if (loading) return <p style={{ padding: "2rem" }}>Loading talents...</p>;
+  if (loading) {
+    return (
+      <p
+        style={{
+          padding: "2rem",
+        }}
+      >
+        Loading talents...
+      </p>
+    );
+  }
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div
+      style={{
+        padding: "clamp(1rem, 4vw, 2rem)",
+        maxWidth: 1200,
+        margin: "0 auto",
+      }}
+    >
       <h1>Talents Gallery</h1>
+
       <p>Celebrating the talents of extraordinary children.</p>
 
       {talents.length === 0 && (
@@ -48,57 +74,113 @@ export default function Talents() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gridTemplateColumns:
+            "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
           gap: "1.5rem",
           marginTop: "2rem",
+          alignItems: "start",
         }}
       >
-        {talents.map((t) => (
+        {talents.map((talent) => (
           <div
-            key={t.id}
+            key={talent.id}
             style={{
               border: "1px solid #e5e7eb",
-              borderRadius: "12px",
+              borderRadius: 12,
               padding: "1rem",
-              background: "#fff",
+              background: "#ffffff",
+              overflow: "hidden",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
-            <h3>{t.name || "Anonymous Child"}</h3>
-            <p style={{ color: "#555" }}>
-              <strong>{t.title || "Untitled Talent"}</strong>
+            <h3
+              style={{
+                marginTop: 0,
+                marginBottom: "1rem",
+              }}
+            >
+              {talent.name || "Anonymous Child"}
+            </h3>
+
+            <p
+              style={{
+                color: "#555",
+                marginBottom: "1rem",
+              }}
+            >
+              <strong>{talent.title || "Untitled Talent"}</strong>
             </p>
 
-            {t.description && (
-              <p style={{ fontSize: "0.9rem", marginTop: "0.25rem" }}>
-                {t.description}
+            {talent.description && (
+              <p
+                style={{
+                  fontSize: "0.9rem",
+                  marginTop: "0.25rem",
+                  marginBottom: "1rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                {talent.description}
               </p>
             )}
 
-            {t.mediaType === "video" && (
+            {/* IMAGE */}
+            {talent.mediaType === "image" && (
+              <img
+                src={talent.mediaUrl}
+                alt={talent.title || "Published talent"}
+                style={{
+                  width: "auto",
+                  height: "auto",
+                  maxWidth: "100%",
+                  maxHeight: 400,
+                  objectFit: "contain",
+                  borderRadius: 8,
+                  margin: "0.75rem 0 0",
+                  display: "block",
+                }}
+              />
+            )}
+
+            {/* VIDEO */}
+            {talent.mediaType === "video" && (
               <video
                 controls
-                src={t.mediaUrl}
-                style={{ width: "100%", borderRadius: "8px", marginTop: "0.75rem" }}
+                preload="metadata"
+                src={talent.mediaUrl}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  maxHeight: 250,
+                  borderRadius: 8,
+                  marginTop: "0.75rem",
+                  display: "block",
+                  background: "#000",
+                }}
               />
             )}
 
-            {t.mediaType === "audio" && (
+            {/* AUDIO */}
+            {talent.mediaType === "audio" && (
               <audio
                 controls
-                src={t.mediaUrl}
-                style={{ width: "100%", marginTop: "0.75rem" }}
+                src={talent.mediaUrl}
+                style={{
+                  width: "100%",
+                  marginTop: "0.75rem",
+                }}
               />
             )}
 
-            {t.mediaType === "image" && (
-              <img
-                src={t.mediaUrl}
-                alt={t.title}
-                style={{ width: "100%", borderRadius: "8px", marginTop: "0.75rem" }}
-              />
-            )}
-
-            <p style={{ fontSize: "0.8rem", marginTop: "0.75rem", color: "#777" }}>
+            <p
+              style={{
+                fontSize: "0.8rem",
+                marginTop: "0.75rem",
+                marginBottom: 0,
+                color: "#777",
+              }}
+            >
               Shared with permission. Personal details are protected.
             </p>
           </div>

@@ -4,7 +4,7 @@ export default function Navbar() {
   return (
     <header className="nav">
       <div className="container nav__inner">
-        <div className="nav__brand">Forgotten Talented Ones Foundation</div>
+        <div className="nav__brand">Forgotten Talents Foundation</div>
 
         <nav className="nav__links">
           <NavLink to="/" end>Home</NavLink>
