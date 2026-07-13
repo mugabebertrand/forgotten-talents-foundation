@@ -11,9 +11,16 @@ import {
   deleteDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../Firebase";
+
 import {
-  getStorage,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+
+import { db, auth, storage } from "../Firebase";
+
+import {
   ref as storageRef,
   deleteObject,
 } from "firebase/storage";
@@ -21,8 +28,13 @@ import {
 export default function Admin() {
   const [subs, setSubs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
 
-  const storage = getStorage();
+  const [user, setUser] = useState(null);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginMessage, setLoginMessage] = useState("");
 
   const loadSubmissions = async () => {
     setLoading(true);
@@ -43,15 +55,59 @@ export default function Admin() {
       setSubs(submissions);
     } catch (error) {
       console.error("Load submissions error:", error);
-      alert("Failed to load submissions. Check the console.");
+      setLoginMessage(
+        "Signed in, but submissions could not be loaded. Check your Firestore rules and admin UID."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadSubmissions();
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+
+      if (currentUser) {
+        await loadSubmissions();
+      } else {
+        setSubs([]);
+        setLoading(false);
+      }
+    });
+
+    return unsubscribe;
   }, []);
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setLoginMessage("");
+
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      setPassword("");
+    } catch (error) {
+      console.error("Login error:", error);
+
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.code === "auth/wrong-password" ||
+        error.code === "auth/user-not-found"
+      ) {
+        setLoginMessage("Incorrect email or password.");
+      } else {
+        setLoginMessage("Login failed. Please try again.");
+      }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   const deleteTalentBySubmissionId = async (submissionId) => {
     const talentsQuery = query(
@@ -100,11 +156,11 @@ export default function Admin() {
         reviewedAt: serverTimestamp(),
       });
 
-      alert("✅ Approved and published to Talents!");
+      alert("Approved and published to Talents.");
       await loadSubmissions();
     } catch (error) {
       console.error("Approve error:", error);
-      alert("❌ Approval failed. Check the console.");
+      alert("Approval failed. Check the console.");
     }
   };
 
@@ -118,11 +174,11 @@ export default function Admin() {
         reviewedAt: serverTimestamp(),
       });
 
-      alert("✅ Submission rejected.");
+      alert("Submission rejected.");
       await loadSubmissions();
     } catch (error) {
       console.error("Reject error:", error);
-      alert("❌ Rejection failed. Check the console.");
+      alert("Rejection failed. Check the console.");
     }
   };
 
@@ -137,13 +193,13 @@ export default function Admin() {
       });
 
       alert(
-        `✅ Unpublished. Removed ${deletedCount} item(s) from the Talents page.`
+        `Unpublished. Removed ${deletedCount} item(s) from the Talents page.`
       );
 
       await loadSubmissions();
     } catch (error) {
       console.error("Unpublish error:", error);
-      alert("❌ Unpublish failed. Check the console.");
+      alert("Unpublish failed. Check the console.");
     }
   };
 
@@ -182,11 +238,11 @@ export default function Admin() {
 
       await deleteDoc(doc(db, "submissions", submission.id));
 
-      alert("✅ Deleted forever.");
+      alert("Deleted forever.");
       await loadSubmissions();
     } catch (error) {
       console.error("Delete forever error:", error);
-      alert("❌ Delete forever failed. Check the console.");
+      alert("Delete forever failed. Check the console.");
     }
   };
 
@@ -200,6 +256,89 @@ export default function Admin() {
     minWidth: 170,
   };
 
+  if (authLoading) {
+    return (
+      <div style={{ padding: "2rem", maxWidth: 700, margin: "0 auto" }}>
+        <p>Checking admin access...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div
+        style={{
+          padding: "2rem",
+          maxWidth: 520,
+          margin: "0 auto",
+        }}
+      >
+        <h1>Admin Login</h1>
+
+        <p style={{ color: "#666", lineHeight: 1.6 }}>
+          Sign in with the Firebase administrator account you created.
+        </p>
+
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Admin email"
+            required
+            style={{
+              width: "100%",
+              padding: 12,
+              marginBottom: 12,
+              boxSizing: "border-box",
+            }}
+          />
+
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
+            required
+            style={{
+              width: "100%",
+              padding: 12,
+              marginBottom: 12,
+              boxSizing: "border-box",
+            }}
+          />
+
+          <button
+            type="submit"
+            style={{
+              padding: "10px 16px",
+              border: "none",
+              borderRadius: 8,
+              background: "#111827",
+              color: "#ffffff",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Sign In
+          </button>
+        </form>
+
+        {loginMessage && (
+          <p
+            style={{
+              marginTop: 14,
+              color: "#b91c1c",
+              lineHeight: 1.5,
+            }}
+          >
+            {loginMessage}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -208,12 +347,43 @@ export default function Admin() {
         margin: "0 auto",
       }}
     >
-      <h1>Admin Review</h1>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 16,
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
+          <h1>Admin Review</h1>
 
-      <p style={{ color: "#666" }}>
-        Review uploads in <strong>submissions</strong>. Approving publishes to{" "}
-        <strong>talents</strong>.
-      </p>
+          <p style={{ color: "#666" }}>
+            Review uploads in <strong>submissions</strong>. Approving publishes
+            to <strong>talents</strong>.
+          </p>
+        </div>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: "10px 16px",
+            border: "1px solid #d1d5db",
+            borderRadius: 8,
+            background: "#ffffff",
+            color: "#111827",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Sign Out
+        </button>
+      </div>
+
+      {loginMessage && (
+        <p style={{ color: "#b91c1c" }}>{loginMessage}</p>
+      )}
 
       {loading && <p>Loading submissions...</p>}
 
@@ -243,12 +413,7 @@ export default function Admin() {
               {submission.title || "Untitled"}
             </h3>
 
-            <p
-              style={{
-                margin: "6px 0",
-                color: "#555",
-              }}
-            >
+            <p style={{ margin: "6px 0", color: "#555" }}>
               Child:{" "}
               <strong>{submission.childName || "Anonymous"}</strong>{" "}
               {submission.childAge
@@ -256,12 +421,7 @@ export default function Admin() {
                 : ""}
             </p>
 
-            <p
-              style={{
-                margin: "6px 0",
-                color: "#777",
-              }}
-            >
+            <p style={{ margin: "6px 0", color: "#777" }}>
               Status:{" "}
               <strong>{submission.status || "submitted"}</strong> | Approved:{" "}
               <strong>{String(Boolean(submission.approved))}</strong>
@@ -327,7 +487,7 @@ export default function Admin() {
                   color: "#ffffff",
                 }}
               >
-                ✅ Approve & Publish
+                Approve & Publish
               </button>
 
               <button
@@ -338,7 +498,7 @@ export default function Admin() {
                   color: "#ffffff",
                 }}
               >
-                ❌ Reject
+                Reject
               </button>
 
               <button
@@ -349,7 +509,7 @@ export default function Admin() {
                   color: "#111827",
                 }}
               >
-                🗑️ Unpublish
+                Unpublish
               </button>
 
               <button
@@ -360,7 +520,7 @@ export default function Admin() {
                   color: "#ffffff",
                 }}
               >
-                ⚠️ Delete Forever
+                Delete Forever
               </button>
             </div>
           </div>
