@@ -4,14 +4,14 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
   return (
-    <div style={{ background: "#f7f8fb" }}>
+    <div style={{ background: "#f7f8fb", overflowX: "hidden" }}>
       {/* HERO */}
       <section
         style={{
           background:
             "linear-gradient(135deg, rgba(10,15,25,1) 0%, rgba(20,32,55,1) 50%, rgba(10,15,25,1) 100%)",
           color: "white",
-          padding: "60px 16px",
+          padding: "clamp(32px, 6vw, 60px) 16px",
         }}
       >
         <div
@@ -19,7 +19,7 @@ export default function Home() {
             maxWidth: 1100,
             margin: "0 auto",
             display: "grid",
-            gridTemplateColumns: "1.2fr 0.8fr",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 24,
             alignItems: "center",
           }}
@@ -29,12 +29,25 @@ export default function Home() {
               Forgotten Talented Foundation
             </div>
 
-            <h1 style={{ fontSize: 48, lineHeight: 1.05, margin: "0 0 14px" }}>
+            <h1
+              style={{
+                fontSize: "clamp(28px, 6vw, 48px)",
+                lineHeight: 1.15,
+                margin: "0 0 14px",
+              }}
+            >
               Recognize talent. Protect privacy. Build opportunity.
             </h1>
 
-            <p style={{ fontSize: 18, opacity: 0.9, margin: "0 0 18px", lineHeight: 1.6 }}>
-              A moderated platform where families can submit children’s music, arts, and skills.
+            <p
+              style={{
+                fontSize: "clamp(15px, 2.5vw, 18px)",
+                opacity: 0.9,
+                margin: "0 0 18px",
+                lineHeight: 1.6,
+              }}
+            >
+              A moderated platform where families can submit children's music, arts, and skills.
               Submissions are reviewed before publishing.
             </p>
 
@@ -88,9 +101,11 @@ export default function Home() {
       </section>
 
       {/* MISSION */}
-      <section style={{ padding: "34px 16px" }}>
+      <section style={{ padding: "clamp(24px, 4vw, 34px) 16px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <h2 style={{ margin: "0 0 10px", fontSize: 28 }}>Our mission</h2>
+          <h2 style={{ margin: "0 0 10px", fontSize: "clamp(22px, 4vw, 28px)" }}>
+            Our mission
+          </h2>
           <p style={{ margin: 0, color: "#384152", maxWidth: 820, lineHeight: 1.7 }}>
             We support families and children facing disability, poverty, or limited access — by providing resources,
             learning support, and inclusive opportunities where talent can grow.
@@ -99,13 +114,13 @@ export default function Home() {
       </section>
 
       {/* PROGRAM CARDS */}
-      <section style={{ padding: "0 16px 50px" }}>
+      <section style={{ padding: "0 16px clamp(30px, 6vw, 50px)" }}>
         <div
           style={{
             maxWidth: 1100,
             margin: "0 auto",
             display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: 16,
           }}
         >
@@ -142,11 +157,11 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: "0 16px 70px" }}>
+      <section style={{ padding: "0 16px clamp(40px, 6vw, 70px)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={styles.ctaBox}>
             <div>
-              <h3 style={{ margin: 0, fontSize: 22 }}>Get involved</h3>
+              <h3 style={{ margin: 0, fontSize: "clamp(19px, 3vw, 22px)" }}>Get involved</h3>
               <p style={{ margin: "8px 0 0", color: "#384152", lineHeight: 1.6 }}>
                 Partner with us, volunteer, or submit a talent entry for review.
               </p>
