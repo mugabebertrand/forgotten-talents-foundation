@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "forgotten-talent",
     "public": "dist",
     "ignore": [
       "firebase.json",
