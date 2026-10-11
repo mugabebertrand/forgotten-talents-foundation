@@ -10,21 +10,24 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { TALENT_CATEGORIES } from "../talentCategories";
+import { useLanguage, Rich } from "../i18n/LanguageContext";
 
 export default function Upload() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     sponsorCode: "",
-    childName: "",
-    childAge: "",
-    sponsorName: "",
-    phone: "",
+    displayName: "",
     email: "",
+    lane: "",
     title: "",
     description: "",
   });
 
   const [file, setFile] = useState(null);
   const [agree, setAgree] = useState(false);
+  const [isAdult, setIsAdult] = useState(false);
+  const [isOriginal, setIsOriginal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
 
@@ -51,32 +54,27 @@ export default function Upload() {
     e.preventDefault();
     setMsg("");
 
-    if (!agree) {
-      setMsg("Please confirm permission to upload.");
+    if (!isAdult || !isOriginal || !agree) {
+      setMsg(t("upload.errConfirm"));
       return;
     }
 
     if (!file) {
-      setMsg("Please choose an audio, video, or image file.");
+      setMsg(t("upload.errFile"));
       return;
     }
 
-    if (
-      !form.sponsorCode ||
-      !form.childName ||
-      !form.sponsorName ||
-      !form.title
-    ) {
-      setMsg("Please fill in all required fields.");
+    if (!form.sponsorCode || !form.displayName || !form.email || !form.title) {
+      setMsg(t("upload.errRequired"));
       return;
     }
 
     setLoading(true);
 
-    let currentStep = "starting the submission";
+    let currentStep = "start";
 
     try {
-      currentStep = "validating the invitation code";
+      currentStep = "code";
       console.log("Step 1: Validating invitation code");
 
       const validCode = await validateSponsorCode(form.sponsorCode);
@@ -84,7 +82,7 @@ export default function Upload() {
       console.log("Invitation code is valid:", validCode);
 
       if (!validCode) {
-        setMsg("Invalid invitation code or inactive code.");
+        setMsg(t("upload.errCode"));
         return;
       }
 
@@ -93,11 +91,11 @@ export default function Upload() {
       const isImage = file.type.startsWith("image/");
 
       if (!isVideo && !isAudio && !isImage) {
-        setMsg("Only audio, video, or image files are allowed.");
+        setMsg(t("upload.errType"));
         return;
       }
 
-      currentStep = "uploading the file to Firebase Storage";
+      currentStep = "upload";
       console.log("Step 2: Uploading file to Firebase Storage");
 
       const safeFileName = file.name.replace(/\s+/g, "_");
@@ -108,23 +106,31 @@ export default function Upload() {
 
       await uploadBytes(storageRef, file);
 
-      currentStep = "getting the file download URL";
+      currentStep = "url";
       console.log("Step 3: Getting file download URL");
 
       const downloadURL = await getDownloadURL(storageRef);
 
-      currentStep = "saving the submission to Firestore";
+      currentStep = "save";
       console.log("Step 4: Saving submission to Firestore");
 
       await addDoc(collection(db, "submissions"), {
         sponsorCode: form.sponsorCode.trim(),
 
-        childName: form.childName.trim(),
-        childAge: form.childAge ? Number(form.childAge) : null,
-
-        sponsorName: form.sponsorName.trim(),
-        phone: form.phone.trim(),
+        // Participant fields. childName/sponsorName are kept for compatibility
+        // with the existing admin review and gallery code.
+        participantType: "adult",
+        displayName: form.displayName.trim(),
+        childName: form.displayName.trim(),
+        childAge: null,
+        sponsorName: form.displayName.trim(),
+        phone: "",
         email: form.email.trim(),
+        lane: form.lane || "",
+
+        ageConfirmed18: true,
+        originalWorkConfirmed: true,
+        ownershipAcknowledged: true,
 
         title: form.title.trim(),
         description: form.description.trim() || "",
@@ -141,21 +147,21 @@ export default function Upload() {
 
       console.log("Submission saved successfully");
 
-      setMsg("✅ Submitted! This entry is pending admin review.");
+      setMsg(t("upload.success"));
 
       setForm({
         sponsorCode: "",
-        childName: "",
-        childAge: "",
-        sponsorName: "",
-        phone: "",
+        displayName: "",
         email: "",
+        lane: "",
         title: "",
         description: "",
       });
 
       setFile(null);
       setAgree(false);
+      setIsAdult(false);
+      setIsOriginal(false);
 
       const fileInput = document.querySelector('input[type="file"]');
 
@@ -168,9 +174,10 @@ export default function Upload() {
       console.error("Full error:", error);
 
       setMsg(
-        `❌ Failed while ${currentStep}. Error: ${
-          error.code || error.message || "Unknown error"
-        }`
+        t("upload.failed", {
+          step: t(`upload.steps.${currentStep}`),
+          error: error.code || error.message || t("upload.unknownError"),
+        })
       );
     } finally {
       setLoading(false);
@@ -185,7 +192,7 @@ export default function Upload() {
         margin: "0 auto",
       }}
     >
-      <h1>Submit Talent</h1>
+      <h1>{t("upload.title")}</h1>
 
       <p
         style={{
@@ -193,9 +200,7 @@ export default function Upload() {
           lineHeight: 1.6,
         }}
       >
-        Sponsors/parents can submit an <b>audio, video, or image</b>. Please do{" "}
-        <b>NOT</b> share a school name, home address, schedules, or other
-        sensitive personal details.
+        <Rich text={t("upload.intro")} />
       </p>
 
       <div
@@ -206,8 +211,7 @@ export default function Upload() {
           borderRadius: 12,
         }}
       >
-        <b>Privacy note:</b> Use a child nickname or initials, such as “A.B.”,
-        instead of a full name.
+        <Rich text={t("upload.privacy")} />
       </div>
 
       <form
@@ -216,7 +220,7 @@ export default function Upload() {
           marginTop: "1rem",
         }}
       >
-        <h3>Invitation Code *</h3>
+        <h3>{t("upload.codeTitle")}</h3>
 
         <p
           style={{
@@ -225,15 +229,14 @@ export default function Upload() {
             fontSize: 13,
           }}
         >
-          This helps prevent spam and keeps submissions review-only during the
-          MVP stage.
+          {t("upload.codeHelp")}
         </p>
 
         <input
           name="sponsorCode"
           value={form.sponsorCode}
           onChange={onChange}
-          placeholder="Example: FTF-0001"
+          placeholder={t("upload.codePlaceholder")}
           style={{
             width: "100%",
             padding: 10,
@@ -241,7 +244,7 @@ export default function Upload() {
           }}
         />
 
-        <h3>Child Information *</h3>
+        <h3>{t("upload.aboutTitle")}</h3>
 
         <div
           style={{
@@ -251,60 +254,10 @@ export default function Upload() {
           }}
         >
           <input
-            name="childName"
-            value={form.childName}
+            name="displayName"
+            value={form.displayName}
             onChange={onChange}
-            placeholder="Child nickname / initials (e.g., A.B.)"
-            style={{
-              flex: 1,
-              padding: 10,
-              marginBottom: 12,
-              minWidth: 260,
-            }}
-          />
-
-          <input
-            name="childAge"
-            value={form.childAge}
-            onChange={onChange}
-            placeholder="Age (optional)"
-            type="number"
-            min="0"
-            max="18"
-            style={{
-              width: 160,
-              padding: 10,
-              marginBottom: 12,
-            }}
-          />
-        </div>
-
-        <h3>Sponsor / Parent Information *</h3>
-
-        <input
-          name="sponsorName"
-          value={form.sponsorName}
-          onChange={onChange}
-          placeholder="Sponsor/Parent name"
-          style={{
-            width: "100%",
-            padding: 10,
-            marginBottom: 12,
-          }}
-        />
-
-        <div
-          style={{
-            display: "flex",
-            gap: 12,
-            flexWrap: "wrap",
-          }}
-        >
-          <input
-            name="phone"
-            value={form.phone}
-            onChange={onChange}
-            placeholder="Phone (optional — for follow-up)"
+            placeholder={t("upload.displayName")}
             style={{
               flex: 1,
               padding: 10,
@@ -317,7 +270,7 @@ export default function Upload() {
             name="email"
             value={form.email}
             onChange={onChange}
-            placeholder="Email (optional — for follow-up)"
+            placeholder={t("upload.email")}
             type="email"
             style={{
               flex: 1,
@@ -328,13 +281,29 @@ export default function Upload() {
           />
         </div>
 
-        <h3>Talent Details *</h3>
+        <select
+          name="lane"
+          value={form.lane}
+          onChange={onChange}
+          style={{
+            width: "100%",
+            padding: 10,
+            marginBottom: 12,
+          }}
+        >
+          <option value="">{t("upload.category")}</option>
+          {TALENT_CATEGORIES.map((category) => (
+            <option key={category.id} value={category.id}>{t(`categories.${category.id}.name`)}</option>
+          ))}
+        </select>
+
+        <h3>{t("upload.workTitle")}</h3>
 
         <input
           name="title"
           value={form.title}
           onChange={onChange}
-          placeholder="Talent title (e.g., Piano performance)"
+          placeholder={t("upload.titlePlaceholder")}
           style={{
             width: "100%",
             padding: 10,
@@ -346,7 +315,7 @@ export default function Upload() {
           name="description"
           value={form.description}
           onChange={onChange}
-          placeholder="Short description (optional)"
+          placeholder={t("upload.description")}
           style={{
             width: "100%",
             padding: 10,
@@ -355,7 +324,15 @@ export default function Upload() {
           }}
         />
 
+        <label
+          htmlFor="talent-file"
+          style={{ display: "block", fontWeight: 600, marginBottom: 6 }}
+        >
+          {t("upload.fileLabel")}
+        </label>
+
         <input
+          id="talent-file"
           type="file"
           accept="audio/*,video/*,image/*"
           onChange={(e) => setFile(e.target.files?.[0] || null)}
@@ -364,20 +341,27 @@ export default function Upload() {
           }}
         />
 
-        <label
-          style={{
-            display: "block",
-            marginBottom: 12,
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={agree}
-            onChange={(e) => setAgree(e.target.checked)}
-          />{" "}
-          I confirm that I am the sponsor, parent, or guardian and that I have
-          permission to submit this media.
-        </label>
+        {[
+          [isAdult, setIsAdult, t("upload.confirmAdult")],
+          [isOriginal, setIsOriginal, t("upload.confirmOriginal")],
+          [agree, setAgree, t("upload.confirmOwnership")],
+        ].map(([checked, setChecked, label], index) => (
+          <label
+            key={index}
+            style={{
+              display: "block",
+              marginBottom: 10,
+              lineHeight: 1.5,
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={checked}
+              onChange={(e) => setChecked(e.target.checked)}
+            />{" "}
+            {label}
+          </label>
+        ))}
 
         <button
           type="submit"
@@ -387,7 +371,7 @@ export default function Upload() {
             cursor: loading ? "not-allowed" : "pointer",
           }}
         >
-          {loading ? "Submitting..." : "Submit"}
+          {loading ? t("upload.submitting") : t("upload.submit")}
         </button>
 
         {msg && (

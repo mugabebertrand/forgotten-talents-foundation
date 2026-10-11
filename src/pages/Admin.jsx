@@ -129,9 +129,11 @@ export default function Admin() {
       await deleteTalentBySubmissionId(submission.id);
 
       await addDoc(collection(db, "talents"), {
-        name: submission.childName || "Anonymous Child",
+        name: submission.displayName || submission.childName || "Anonymous",
         age: submission.childAge ?? null,
-        title: submission.title || "Untitled Talent",
+        participantType: submission.participantType || null,
+        lane: submission.lane || null,
+        title: submission.title || "Untitled",
         description:
           submission.description ||
           "Shared with permission. Personal details are protected.",
@@ -414,10 +416,11 @@ export default function Admin() {
             </h3>
 
             <p style={{ margin: "6px 0", color: "#555" }}>
-              Child:{" "}
-              <strong>{submission.childName || "Anonymous"}</strong>{" "}
+              {submission.participantType === "adult" ? "Participant (18+)" : "Legacy entry"}:{" "}
+              <strong>{submission.displayName || submission.childName || "Anonymous"}</strong>{" "}
+              {submission.lane ? `• Category: ${submission.lane}` : ""}
               {submission.childAge
-                ? `(Age ${submission.childAge})`
+                ? ` (Age ${submission.childAge})`
                 : ""}
             </p>
 

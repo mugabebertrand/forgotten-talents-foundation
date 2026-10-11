@@ -6,8 +6,15 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../Firebase";
+import { useLanguage } from "../i18n/LanguageContext";
+
+// Entries from the original children's version of the site have no participantType.
+// They stay hidden so the public gallery only shows adult (18+) participants.
+// Set this to true only if you deliberately want to show older entries again.
+const SHOW_LEGACY_ENTRIES = false;
 
 export default function Talents() {
+  const { t } = useLanguage();
   const [talents, setTalents] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +35,7 @@ export default function Talents() {
           }))
           .filter(
             (talent) =>
+              (SHOW_LEGACY_ENTRIES || talent.participantType === "adult") &&
               talent.name?.toLowerCase() !== "test child" &&
               talent.title?.toLowerCase() !== "singing talent"
           );
@@ -50,7 +58,7 @@ export default function Talents() {
           padding: "2rem",
         }}
       >
-        Loading talents...
+        {t("talents.loading")}
       </p>
     );
   }
@@ -63,12 +71,12 @@ export default function Talents() {
         margin: "0 auto",
       }}
     >
-      <h1>Talents Gallery</h1>
+      <h1>{t("talents.title")}</h1>
 
-      <p>Celebrating the talents of extraordinary children.</p>
+      <p>{t("talents.subtitle")}</p>
 
       {talents.length === 0 && (
-        <p>No talents published yet. Please check back soon.</p>
+        <p>{t("talents.empty")}</p>
       )}
 
       <div
@@ -100,7 +108,7 @@ export default function Talents() {
                 marginBottom: "1rem",
               }}
             >
-              {talent.name || "Anonymous Child"}
+              {talent.name || t("talents.anonymous")}
             </h3>
 
             <p
@@ -109,7 +117,7 @@ export default function Talents() {
                 marginBottom: "1rem",
               }}
             >
-              <strong>{talent.title || "Untitled Talent"}</strong>
+              <strong>{talent.title || t("talents.untitled")}</strong>
             </p>
 
             {talent.description && (
@@ -129,7 +137,7 @@ export default function Talents() {
             {talent.mediaType === "image" && (
               <img
                 src={talent.mediaUrl}
-                alt={talent.title || "Published talent"}
+                alt={talent.title || t("talents.imageAlt")}
                 style={{
                   width: "auto",
                   height: "auto",
@@ -181,7 +189,7 @@ export default function Talents() {
                 color: "#777",
               }}
             >
-              Shared with permission. Personal details are protected.
+              {t("talents.shared")}
             </p>
           </div>
         ))}

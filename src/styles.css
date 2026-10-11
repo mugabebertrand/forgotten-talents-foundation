@@ -115,6 +115,44 @@ audio {
   text-decoration: underline;
 }
 
+.nav .container {
+  width: min(1140px, 92%);
+}
+
+.nav__links {
+  order: 1;
+  margin-left: auto;
+  column-gap: 14px;
+}
+
+.nav__lang {
+  order: 2;
+  display: flex;
+  gap: 4px;
+}
+
+.nav__lang button {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav__lang button:hover {
+  border-color: white;
+  color: white;
+}
+
+.nav__lang button.is-active {
+  background: white;
+  color: #0b1220;
+  border-color: white;
+}
+
 .nav__toggle {
   display: none;
   width: 36px;
@@ -156,6 +194,17 @@ audio {
 
   .nav__toggle {
     display: block;
+    order: 2;
+  }
+
+  .nav__lang {
+    order: 1;
+    margin-left: auto;
+  }
+
+  .nav__links {
+    order: 3;
+    margin-left: 0;
   }
 
   .nav__links {

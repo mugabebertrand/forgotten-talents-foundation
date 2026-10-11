@@ -1,6 +1,10 @@
-# Forgotten Talents Foundation
+# Forgotten Talent
 
-A modern web platform designed to help identify, protect, and showcase children's talents through a secure moderation process before they are shared publicly.
+**Don't just tell us what you can do. Show us.**
+
+Forgotten Talent discovers overlooked talent through real challenges from local businesses. Every submission is reviewed before it is published, and strong work builds a verified record that leads to paid opportunities. Participants are 18+.
+
+> This project began as *Forgotten Talents Foundation*, a moderated platform for children's talents. It is being developed into Forgotten Talent, an independent student venture entered in UTA's MavPitch competition (not operated or endorsed by UTA).
 
 Built with **React**, **Firebase Authentication**, **Firestore**, and **Firebase Storage**.
 

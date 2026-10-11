@@ -1,8 +1,10 @@
 // Home.jsx
-import React from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../i18n/LanguageContext";
 
 export default function Home() {
+  const { t } = useLanguage();
+  const cards = t("home.cards");
   return (
     <div style={{ background: "#f7f8fb", overflowX: "hidden" }}>
       {/* HERO */}
@@ -26,7 +28,7 @@ export default function Home() {
         >
           <div>
             <div style={{ fontSize: 14, opacity: 0.85, marginBottom: 10 }}>
-              Forgotten Talented Foundation
+              {t("home.eyebrow")}
             </div>
 
             <h1
@@ -36,7 +38,7 @@ export default function Home() {
                 margin: "0 0 14px",
               }}
             >
-              Recognize talent. Protect privacy. Build opportunity.
+              {t("home.title")}
             </h1>
 
             <p
@@ -47,26 +49,25 @@ export default function Home() {
                 lineHeight: 1.6,
               }}
             >
-              A moderated platform where families can submit children's music, arts, and skills.
-              Submissions are reviewed before publishing.
+              {t("home.subtitle")}
             </p>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               <Link to="/upload" style={styles.primaryBtn}>
-                Submit Talent
+                {t("home.submit")}
               </Link>
 
               <Link to="/talents" style={styles.secondaryBtn}>
-                View Gallery
+                {t("home.gallery")}
               </Link>
 
-              <Link to="/programs" style={styles.ghostBtn}>
-                Programs
+              <Link to="/businesses" style={styles.ghostBtn}>
+                {t("home.bookSponsor")}
               </Link>
             </div>
 
             <p style={{ fontSize: 13, opacity: 0.75, marginTop: 14 }}>
-              Please avoid sharing school names, home addresses, or schedules in uploads.
+              {t("home.note")}
             </p>
           </div>
 
@@ -74,25 +75,25 @@ export default function Home() {
           <div style={styles.heroCard}>
             <div style={styles.heroCardInner}>
               <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 10, fontWeight: 700 }}>
-                How it works
+                {t("home.howTitle")}
               </div>
 
               <ol style={{ margin: 0, paddingLeft: 18, opacity: 0.95, lineHeight: 1.6 }}>
-                <li style={{ marginBottom: 8 }}>Submit media using an invitation code</li>
-                <li style={{ marginBottom: 8 }}>Admin reviews submission for safety + quality</li>
-                <li style={{ marginBottom: 8 }}>Approved entries appear in the Talent Gallery</li>
+                {t("home.how").map((step) => (
+                  <li key={step} style={{ marginBottom: 8 }}>{step}</li>
+                ))}
               </ol>
 
               <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75 }}>
-                MVP demo: donation processing will be enabled after registration and verification.
+                {t("home.pilot")}
               </div>
 
               <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <Link to="/admin" style={styles.smallDarkBtn}>
-                  Admin Review
+                <Link to="/challenges" style={styles.smallDarkBtn}>
+                  {t("common.seeCategories")}
                 </Link>
                 <Link to="/contact" style={styles.smallLightBtn}>
-                  Contact
+                  {t("common.contact")}
                 </Link>
               </div>
             </div>
@@ -104,16 +105,15 @@ export default function Home() {
       <section style={{ padding: "clamp(24px, 4vw, 34px) 16px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <h2 style={{ margin: "0 0 10px", fontSize: "clamp(22px, 4vw, 28px)" }}>
-            Our mission
+            {t("home.missionTitle")}
           </h2>
           <p style={{ margin: 0, color: "#384152", maxWidth: 820, lineHeight: 1.7 }}>
-            We support families and children facing disability, poverty, or limited access — by providing resources,
-            learning support, and inclusive opportunities where talent can grow.
+            {t("home.missionText")}
           </p>
         </div>
       </section>
 
-      {/* PROGRAM CARDS */}
+      {/* VALUE CARDS */}
       <section style={{ padding: "0 16px clamp(30px, 6vw, 50px)" }}>
         <div
           style={{
@@ -124,35 +124,15 @@ export default function Home() {
             gap: 16,
           }}
         >
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Family support</h3>
-            <p style={styles.cardText}>
-              Guidance for parents and caregivers, referrals to services, and practical support resources.
-            </p>
-            <Link to="/programs#family" style={styles.cardLink}>
-              Explore family support →
-            </Link>
-          </div>
-
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Education & life skills</h3>
-            <p style={styles.cardText}>
-              Learning routines, communication, confidence building, and skill development opportunities.
-            </p>
-            <Link to="/programs#education" style={styles.cardLink}>
-              Explore education & life skills →
-            </Link>
-          </div>
-
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Inclusion & talent</h3>
-            <p style={styles.cardText}>
-              A privacy-first talent submission and moderation process to celebrate safe, positive content.
-            </p>
-            <Link to="/programs#talent" style={styles.cardLink}>
-              Explore inclusion & talent →
-            </Link>
-          </div>
+          {cards.map((card, index) => (
+            <div key={card.title} style={styles.card}>
+              <h3 style={styles.cardTitle}>{card.title}</h3>
+              <p style={styles.cardText}>{card.text}</p>
+              <Link to={["/challenges", "/businesses", "/talents"][index]} style={styles.cardLink}>
+                {card.link}
+              </Link>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -161,18 +141,18 @@ export default function Home() {
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={styles.ctaBox}>
             <div>
-              <h3 style={{ margin: 0, fontSize: "clamp(19px, 3vw, 22px)" }}>Get involved</h3>
+              <h3 style={{ margin: 0, fontSize: "clamp(19px, 3vw, 22px)" }}>{t("home.ctaTitle")}</h3>
               <p style={{ margin: "8px 0 0", color: "#384152", lineHeight: 1.6 }}>
-                Partner with us, volunteer, or submit a talent entry for review.
+                {t("home.ctaText")}
               </p>
             </div>
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link to="/donate" style={styles.primaryBtn}>
-                Support (Coming Soon)
+              <Link to="/upload" style={styles.primaryBtn}>
+                {t("home.ctaButton")}
               </Link>
-              <Link to="/contact" style={styles.secondaryBtnDarkBorder}>
-                Partner / Volunteer
+              <Link to="/businesses" style={styles.secondaryBtnDarkBorder}>
+                {t("home.bookSponsor")}
               </Link>
             </div>
           </div>
