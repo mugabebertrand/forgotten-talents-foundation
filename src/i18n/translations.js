@@ -39,11 +39,11 @@ export const translations = {
     footer: {
       tagline: "Don't just tell us what you can do. Show us.",
       disclaimer:
-        "Forgotten Talent is an independent student venture entered in UTA's MavPitch competition. It is not operated or endorsed by the University of Texas at Arlington.",
+        "Forgotten Talent is an independent platform founded by Jean Mugabe to help overlooked creators be seen, rewarded and connected to real opportunities.",
     },
 
     home: {
-      eyebrow: "Forgotten Talent • UTA student startup",
+      eyebrow: "Forgotten Talent • Online talent challenges",
       title: "Don't just tell us what you can do. Show us.",
       subtitle:
         "Forgotten Talent discovers overlooked talent: singers, musicians, artists, performers, designers and more. Every submission is reviewed, and the best are promoted through our gallery, live showcases and social media, then connected to bookings, clients and paid opportunities.",
@@ -58,7 +58,7 @@ export const translations = {
         "The best are featured in our gallery, showcases and social media",
         "Talent connects to bookings, clients and paid opportunities",
       ],
-      pilot: "Pilot launching fall 2026 at UTA and in Arlington, Texas.",
+      pilot: "Challenge #1 is coming soon. Follow us on YouTube for the launch.",
       missionTitle: "Our mission",
       missionText:
         "Talent is everywhere. Opportunity isn't. We discover people with real ability who lack connections, followers or experience, verify what they can do on real work, and help them rise into paid projects and careers.",
@@ -110,7 +110,7 @@ export const translations = {
         "I'm Jean Mugabe, an Information Systems major and Music minor at the University of Texas at Arlington, with a completed software engineering bootcamp. I first built this platform to help overlooked children get seen. Building it showed me the bigger problem: talented people have no trusted way to prove what they can do. Forgotten Talent is my answer: a fair, structured way to discover talent and help it rise.",
       statusTitle: "Current status",
       statusText:
-        "Working today: invitation-based submissions, admin review for quality and safety, and a public gallery of approved work. In development: open calls, rubric scoring, verified participant records, showcase pages and booking requests. Showcase #1 is planned for fall 2026 at UTA and in Arlington, Texas.",
+        "Working today: invitation-based submissions, admin review for quality and safety, a public gallery of approved work, challenge rules and our YouTube channel. Coming next: Challenge #1, with rewards for the winners and their work featured on YouTube.",
     },
 
     challenges: {
@@ -120,7 +120,7 @@ export const translations = {
       comingSoon: "Coming soon",
       openCallTitle: "Forgotten Talent Showcase #1: Open Call",
       openCallText:
-        "Our first open call welcomes every kind of talent, starting with UTA students and talent in our network (18+), in fall 2026. Entry is free. Reviewers score every entry, and finalists will be featured in our gallery, on social media and at a planned live showcase in Arlington, Texas. Details and dates will be posted here.",
+        "Our first online open call welcomes every kind of talent from creators 18+ around the world. Entry is free. Reviewers score every entry, and the winners are rewarded and featured on our YouTube channel.",
       current: {
         tag: "Challenge #1",
         title: "Show us your talent",
@@ -184,7 +184,7 @@ export const translations = {
       ],
       pilotTag: "Pilot",
       info: [
-        ["Starting in Arlington, Texas", "Our first showcase and partnerships are planned for fall 2026 at UTA and in Arlington."],
+        ["Starting online, worldwide", "Our first challenges are online and open to creators 18+ around the world. Business partnerships come next, as our audience grows."],
         ["Simple and transparent", "Bookings, purchases and sponsorships are agreed in writing, with clear terms for you and the talent."],
         ["Fair to talent", "Talent keep ownership of their work. Using someone's work requires their agreement and fair payment."],
       ],
@@ -298,11 +298,11 @@ export const translations = {
     footer: {
       tagline: "Ne nous dites pas seulement ce que vous savez faire. Montrez-le-nous.",
       disclaimer:
-        "Forgotten Talent est une initiative étudiante indépendante inscrite au concours MavPitch de UTA. Elle n'est ni gérée ni approuvée par l'Université du Texas à Arlington.",
+        "Forgotten Talent est une plateforme indépendante fondée par Jean Mugabe pour aider les créateurs méconnus à être vus, récompensés et mis en relation avec de vraies opportunités.",
     },
 
     home: {
-      eyebrow: "Forgotten Talent • Start-up étudiante de UTA",
+      eyebrow: "Forgotten Talent • Défis de talents en ligne",
       title: "Ne nous dites pas ce que vous savez faire. Montrez-le-nous.",
       subtitle:
         "Forgotten Talent révèle des talents méconnus : chanteurs, musiciens, artistes, performeurs, designers et bien d'autres. Chaque soumission est évaluée, et les meilleurs sont mis en avant dans notre galerie, lors de spectacles en direct et sur les réseaux sociaux, puis mis en relation avec des réservations, des clients et des opportunités rémunérées.",
@@ -317,7 +317,7 @@ export const translations = {
         "Les meilleurs sont mis en avant dans notre galerie, nos spectacles et sur les réseaux sociaux",
         "Le talent est mis en relation avec des réservations, des clients et des opportunités rémunérées",
       ],
-      pilot: "Lancement du pilote à l'automne 2026 à UTA et à Arlington, au Texas.",
+      pilot: "Le Défi n°1 arrive bientôt. Suivez-nous sur YouTube pour son lancement.",
       missionTitle: "Notre mission",
       missionText:
         "Le talent est partout. Les opportunités, non. Nous découvrons des personnes aux vraies compétences qui manquent de relations, d'abonnés ou d'expérience, nous vérifions ce qu'elles savent faire sur de vrais projets, et nous les aidons à accéder à des projets rémunérés et à des carrières.",
@@ -369,7 +369,7 @@ export const translations = {
         "Je suis Jean Mugabe, étudiant en systèmes d'information avec une mineure en musique à l'Université du Texas à Arlington, et diplômé d'un bootcamp en génie logiciel. J'ai d'abord créé cette plateforme pour aider des enfants oubliés à être vus. En la construisant, j'ai découvert un problème plus large : les personnes talentueuses n'ont aucun moyen fiable de prouver ce qu'elles savent faire. Forgotten Talent est ma réponse : une façon juste et structurée de découvrir les talents et de les aider à s'élever.",
       statusTitle: "Situation actuelle",
       statusText:
-        "Disponible aujourd'hui : soumissions sur invitation, vérification par l'administrateur pour la qualité et la sécurité, et une galerie publique des travaux approuvés. En développement : appels ouverts, notation par grille, dossiers vérifiés des participants, pages de spectacles et demandes de réservation. Le Spectacle n°1 est prévu à l'automne 2026 à UTA et à Arlington, au Texas.",
+        "Disponible aujourd'hui : soumissions sur invitation, vérification par l'administrateur pour la qualité et la sécurité, une galerie publique des travaux approuvés, le règlement des défis et notre chaîne YouTube. Prochaine étape : le Défi n°1, avec des récompenses pour les gagnants et leur travail présenté sur YouTube.",
     },
 
     challenges: {
@@ -379,7 +379,7 @@ export const translations = {
       comingSoon: "Bientôt",
       openCallTitle: "Forgotten Talent Spectacle n°1 : appel ouvert",
       openCallText:
-        "Notre premier appel ouvert accueille tous les talents, en commençant par les étudiants de UTA et les talents de notre réseau (18 ans et plus), à l'automne 2026. La participation est gratuite. Les évaluateurs notent chaque soumission, et les finalistes seront mis en avant dans notre galerie, sur les réseaux sociaux et lors d'un spectacle en direct prévu à Arlington, au Texas. Les détails et les dates seront publiés ici.",
+        "Notre premier appel ouvert en ligne accueille tous les talents, pour les créateurs de 18 ans et plus du monde entier. La participation est gratuite. Les évaluateurs notent chaque participation, et les gagnants sont récompensés et présentés sur notre chaîne YouTube.",
       current: {
         tag: "Défi n°1",
         title: "Montrez-nous votre talent",
@@ -443,7 +443,7 @@ export const translations = {
       ],
       pilotTag: "Pilote",
       info: [
-        ["Lancement à Arlington, au Texas", "Notre premier spectacle et nos premiers partenariats sont prévus à l'automne 2026 à UTA et à Arlington."],
+        ["En ligne, partout dans le monde", "Nos premiers défis se déroulent en ligne et sont ouverts aux créateurs de 18 ans et plus du monde entier. Les partenariats avec les entreprises viendront ensuite, avec la croissance de notre audience."],
         ["Simple et transparent", "Les réservations, achats et parrainages sont convenus par écrit, avec des conditions claires pour vous et pour le talent."],
         ["Équitable pour les talents", "Les talents restent propriétaires de leur travail. Utiliser l'œuvre de quelqu'un nécessite son accord et une rémunération équitable."],
       ],
@@ -557,11 +557,11 @@ export const translations = {
     footer: {
       tagline: "Ntutubwire gusa ibyo ushoboye. Bitwereke.",
       disclaimer:
-        "Forgotten Talent ni umushinga wigenga w'umunyeshuri witabiriye irushanwa rya MavPitch rya UTA. Ntuyoborwa kandi ntiwemejwe na Kaminuza ya Texas i Arlington.",
+        "Forgotten Talent ni urubuga rwigenga rwashinzwe na Jean Mugabe kugira ngo rufashe abanyempano birengagijwe kubonwa, guhembwa no guhuzwa n'amahirwe nyayo.",
     },
 
     home: {
-      eyebrow: "Forgotten Talent • Umushinga mushya w'umunyeshuri wa UTA",
+      eyebrow: "Forgotten Talent • Amarushanwa y'impano kuri interineti",
       title: "Ntutubwire ibyo ushoboye. Bitwereke.",
       subtitle:
         "Forgotten Talent ivumbura impano zirengagijwe: abaririmbyi, abacuranzi, abanyabugeni, abakinnyi, abahanga mu gushushanya (designers) n'abandi. Buri gihangano cyoherejwe kirasuzumwa, maze ibyiza kurusha ibindi bikamenyekanishwa mu imurika ryacu, mu bitaramo bibera imbonankubone no ku mbuga nkoranyambaga, hanyuma ba nyirabyo bagahuzwa n'ababatumira, abakiriya n'amahirwe y'akazi gahemberwa.",
@@ -576,7 +576,7 @@ export const translations = {
         "Ibyiza kurusha ibindi bigaragazwa mu imurika ryacu, mu bitaramo no ku mbuga nkoranyambaga",
         "Umunyempano ahuzwa n'abamutumira, abakiriya n'amahirwe y'akazi gahemberwa",
       ],
-      pilot: "Igerageza rizatangira mu muhindo wa 2026 kuri UTA no mu mujyi wa Arlington, muri Texas.",
+      pilot: "Irushanwa rya 1 riraza vuba. Dukurikire kuri YouTube kugira ngo umenye igihe rizatangirira.",
       missionTitle: "Intego yacu",
       missionText:
         "Impano ziri hose. Amahirwe ntari hose. Tuvumbura abantu bafite ubushobozi nyabwo ariko batagira abo baziranye, ababakurikira cyangwa uburambe, tukagenzura ibyo bashoboye dukoresheje imirimo nyayo, kandi tukabafasha gutera imbere bakabona imishinga ihemberwa n'imyuga.",
@@ -628,7 +628,7 @@ export const translations = {
         "Nitwa Jean Mugabe. Niga Information Systems nk'ishami ry'ibanze n'Umuziki nk'ishami rya kabiri muri Kaminuza ya Texas i Arlington, kandi narangije amahugurwa yihuse (bootcamp) mu gukora porogaramu za mudasobwa. Natangije uru rubuga mbanje kugira ngo mfashe abana birengagijwe kubonwa. Kurwubaka byanyeretse ikibazo kinini kurushaho: abantu bafite impano nta buryo bwizewe bafite bwo kugaragaza ibyo bashoboye. Forgotten Talent ni igisubizo cyanjye: uburyo buboneye kandi buteguwe neza bwo kuvumbura impano no kuzifasha gutera imbere.",
       statusTitle: "Aho umushinga ugeze",
       statusText:
-        "Ibikora ubu: kohereza ibihangano hakoreshejwe ubutumire, isuzuma ry'umuyobozi ku bwiza n'umutekano, n'imurika rusange ry'ibihangano byemejwe. Ibiri gutegurwa: ubutumire rusange, gutanga amanota hakoreshejwe ibipimo, inyandiko zemejwe z'abitabiriye, amapaji y'ibitaramo n'ubusabe bwo gutumira abanyempano. Igitaramo cya 1 giteganyijwe mu muhindo wa 2026 kuri UTA no mu mujyi wa Arlington, muri Texas.",
+        "Ibikora ubu: kohereza ibihangano hakoreshejwe ubutumire, isuzuma ry'umuyobozi ku bwiza n'umutekano, imurika rusange ry'ibihangano byemejwe, amategeko y'amarushanwa n'urubuga rwacu rwa YouTube. Igikurikiyeho: Irushanwa rya 1, aho abatsinze bazahembwa kandi ibihangano byabo bikagaragazwa kuri YouTube.",
     },
 
     challenges: {
@@ -638,7 +638,7 @@ export const translations = {
       comingSoon: "Biraza vuba",
       openCallTitle: "Igitaramo cya 1 cya Forgotten Talent: Ubutumire rusange",
       openCallText:
-        "Ubutumire bwacu rusange bwa mbere bwakira ubwoko bwose bw'impano, duhereye ku banyeshuri ba UTA n'abanyempano bo mu bo dukorana (bafite imyaka 18 kuzamura), mu muhindo wa 2026. Kwitabira ni ubuntu. Abasuzumyi baha amanota buri gihangano, kandi abazagera ku cyiciro cya nyuma bazagaragazwa mu imurika ryacu, ku mbuga nkoranyambaga no mu gitaramo giteganyijwe kubera imbonankubone i Arlington, muri Texas. Ibisobanuro n'amatariki bizatangarizwa hano.",
+        "Ubutumire bwacu rusange bwa mbere kuri interineti bwakira ubwoko bwose bw'impano ku bahanzi bafite imyaka 18 kuzamura ku isi hose. Kwitabira ni ubuntu. Abasuzumyi baha amanota buri gihangano, maze abatsinze bagahembwa kandi bakagaragazwa ku rubuga rwacu rwa YouTube.",
       current: {
         tag: "Irushanwa rya 1",
         title: "Twereke impano yawe",
@@ -702,7 +702,7 @@ export const translations = {
       ],
       pilotTag: "Igerageza",
       info: [
-        ["Duhereye i Arlington, muri Texas", "Igitaramo cyacu cya mbere n'ubufatanye bwa mbere biteganyijwe mu muhindo wa 2026 kuri UTA no muri Arlington."],
+        ["Duhereye kuri interineti, ku isi hose", "Amarushanwa yacu ya mbere abera kuri interineti kandi afunguriwe abahanzi bafite imyaka 18 kuzamura ku isi hose. Ubufatanye n'ibigo buzaza nyuma, uko abadukurikira biyongera."],
         ["Byoroshye kandi bisobanutse", "Gutumira, kugura no gutera inkunga byemeranywaho mu nyandiko, hamwe n'amabwiriza asobanutse kuri wowe no ku munyempano."],
         ["Biboneye ku banyempano", "Abanyempano bakomeza kuba ba nyiri ibihangano byabo. Gukoresha igihangano cy'undi bisaba ko abyemera kandi akishyurwa mu buryo buboneye."],
       ],
