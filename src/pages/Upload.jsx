@@ -12,6 +12,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { TALENT_CATEGORIES } from "../talentCategories";
 import { useLanguage, Rich } from "../i18n/LanguageContext";
+import { Link } from "react-router-dom";
 
 export default function Upload() {
   const { t } = useLanguage();
@@ -200,7 +201,8 @@ export default function Upload() {
           lineHeight: 1.6,
         }}
       >
-        <Rich text={t("upload.intro")} />
+        <Rich text={t("upload.intro")} />{" "}
+        <Link to="/rules" style={{ color: "#2563eb", fontWeight: 700 }}>{t("common.readRules")} →</Link>
       </p>
 
       <div

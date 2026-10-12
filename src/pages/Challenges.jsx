@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ui } from "../ui";
+import { ui, YOUTUBE_URL } from "../ui";
 import { TALENT_CATEGORIES } from "../talentCategories";
 import { useLanguage } from "../i18n/LanguageContext";
 
@@ -14,9 +14,24 @@ export default function Challenges() {
         <p style={ui.lead}>{t("challenges.lead")}</p>
 
         <div style={{ ...ui.card, borderLeft: "5px solid #2563eb" }}>
-          <div style={ui.tag}>{t("challenges.comingSoon")}</div>
-          <h2 style={ui.h2}>{t("challenges.openCallTitle")}</h2>
-          <p style={ui.text}>{t("challenges.openCallText")}</p>
+          <div style={ui.tag}>{t("challenges.current.tag")}</div>
+          <h2 style={ui.h2}>{t("challenges.current.title")}</h2>
+          <p style={ui.text}>{t("challenges.current.text")}</p>
+          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", marginTop: 14 }}>
+            <div>
+              <div style={{ ...ui.text, fontSize: 13, fontWeight: 700 }}>{t("challenges.current.prizeLabel")}</div>
+              <div style={{ color: "#111827", fontWeight: 700 }}>{t("challenges.current.prize")}</div>
+            </div>
+            <div>
+              <div style={{ ...ui.text, fontSize: 13, fontWeight: 700 }}>{t("challenges.current.deadlineLabel")}</div>
+              <div style={{ color: "#111827", fontWeight: 700 }}>{t("challenges.current.deadline")}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 16 }}>
+            <Link to="/upload" style={ui.primaryBtn}>{t("common.submitWork")}</Link>
+            <Link to="/rules" style={ui.lightBtn}>{t("common.readRules")}</Link>
+            <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" style={ui.lightBtn}>{t("common.watchYoutube")} ↗</a>
+          </div>
         </div>
 
         <div style={ui.section}>

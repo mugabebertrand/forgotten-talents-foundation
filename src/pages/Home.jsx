@@ -1,6 +1,7 @@
 // Home.jsx
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { YOUTUBE_URL } from "../ui";
 
 export default function Home() {
   const { t } = useLanguage();
@@ -92,9 +93,9 @@ export default function Home() {
                 <Link to="/challenges" style={styles.smallDarkBtn}>
                   {t("common.seeCategories")}
                 </Link>
-                <Link to="/contact" style={styles.smallLightBtn}>
-                  {t("common.contact")}
-                </Link>
+                <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" style={styles.smallLightBtn}>
+                  {t("common.watchYoutube")} ↗
+                </a>
               </div>
             </div>
           </div>

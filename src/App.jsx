@@ -11,6 +11,7 @@ import Contact from "./pages/Contact";
 import Upload from "./pages/Upload";
 import Talents from "./pages/Talents";
 import Admin from "./pages/Admin";
+import Rules from "./pages/Rules";
 
 export default function App() {
   const { t } = useLanguage();
@@ -27,6 +28,7 @@ export default function App() {
         <Route path="/upload" element={<Upload />} />
         <Route path="/talents" element={<Talents />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/rules" element={<Rules />} />
 
         {/* Old links keep working */}
         <Route path="/about" element={<Navigate to="/how-it-works" replace />} />

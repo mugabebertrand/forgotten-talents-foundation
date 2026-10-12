@@ -20,3 +20,4 @@ export const ui = {
 };
 
 export const CONTACT_EMAIL = "jeanjacquesbertrandmugabe@gmail.com";
+export const YOUTUBE_URL = "https://www.youtube.com/@ForgottenTalentTV";

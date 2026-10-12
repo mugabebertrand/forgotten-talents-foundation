@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../i18n/LanguageContext";
+import { YOUTUBE_URL } from "../ui";
 
 export default function Footer() {
   const { t } = useLanguage();
@@ -14,7 +15,9 @@ export default function Footer() {
         <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "flex-start" }}>
           <Link to="/how-it-works" style={linkStyle}>{t("nav.how")}</Link>
           <Link to="/businesses" style={linkStyle}>{t("nav.businesses")}</Link>
+          <Link to="/rules" style={linkStyle}>{t("nav.rules")}</Link>
           <Link to="/contact" style={linkStyle}>{t("nav.contact")}</Link>
+          <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" style={linkStyle}>{t("nav.youtube")} ↗</a>
         </div>
       </div>
     </footer>
